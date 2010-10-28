@@ -23,7 +23,7 @@ package sim.instrumentation.aop.aspectj;
  * 
  */
 public abstract aspect AbstractMethodInterceptor {
-	abstract pointcut methodExecution();
+	public abstract pointcut methodExecution();
 
 	before(): methodExecution() {
 		// fire event before method execution

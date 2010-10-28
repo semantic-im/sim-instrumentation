@@ -25,5 +25,5 @@ import sim.instrumentation.annotation.Instrument;
  * 
  */
 public aspect AnnotationMethodInterceptor extends AbstractMethodInterceptor {
-	pointcut methodExecution(): within(@Instrument *) && execution(* *(..));
+	public pointcut methodExecution(): within(@Instrument *) && execution(* *(..));
 }
