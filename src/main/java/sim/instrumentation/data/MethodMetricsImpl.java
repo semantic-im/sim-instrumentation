@@ -217,4 +217,49 @@ class MethodMetricsImpl implements MethodMetrics {
 		this.processTotalCpuTime = processTotalCpuTime;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("MethodMetricsImpl [methodName=");
+		builder.append(methodName);
+		builder.append(", className=");
+		builder.append(className);
+		builder.append(", context=");
+		builder.append(context);
+		builder.append(", exception=");
+		builder.append(exception);
+		builder.append(", endedWithError=");
+		builder.append(endedWithError);
+		builder.append(", beginExecutionTime=");
+		builder.append(beginExecutionTime);
+		builder.append(", endExecutionTime=");
+		builder.append(endExecutionTime);
+		builder.append(", wallClockTime=");
+		builder.append(wallClockTime);
+		builder.append(", threadUserCpuTime=");
+		builder.append(threadUserCpuTime);
+		builder.append(", threadSystemCpuTime=");
+		builder.append(threadSystemCpuTime);
+		builder.append(", threadTotalCpuTime=");
+		builder.append(threadTotalCpuTime);
+		builder.append(", threadCount=");
+		builder.append(threadCount);
+		builder.append(", threadBlockCount=");
+		builder.append(threadBlockCount);
+		builder.append(", threadBlockTime=");
+		builder.append(threadBlockTime);
+		builder.append(", threadWaitCount=");
+		builder.append(threadWaitCount);
+		builder.append(", threadWaitTime=");
+		builder.append(threadWaitTime);
+		builder.append(", threadGccCount=");
+		builder.append(threadGccCount);
+		builder.append(", threadGccTime=");
+		builder.append(threadGccTime);
+		builder.append(", processTotalCpuTime=");
+		builder.append(processTotalCpuTime);
+		builder.append("]");
+		return builder.toString();
+	}
+
 }
