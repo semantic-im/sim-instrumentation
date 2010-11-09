@@ -15,6 +15,14 @@
  */
 package sim.instrumentation.aop.aspectj;
 
+import java.util.Deque;
+import java.util.LinkedList;
+
+import org.aspectj.lang.Signature;
+
+import sim.instrumentation.data.MethodProbe;
+import sim.instrumentation.data.Probe;
+
 /**
  * Aspect responsible for triggering events when methods we are interested in
  * are executed.
@@ -26,18 +34,52 @@ public abstract aspect AbstractMethodInterceptor {
 	public abstract pointcut methodExecution();
 
 	before(): methodExecution() {
-		// fire event before method execution
+		System.out.println("aop before " + thisJoinPointStaticPart.toLongString());
+		Signature sig = thisJoinPointStaticPart.getSignature();
+		MethodProbe mp = Probe.createMethodProbe(sig.getDeclaringTypeName(), sig.getName());
+		mp.begin();
+		push(mp);
 	}
 
 	after() returning: methodExecution() {
-		// fire event after method execution which completed successfully
+		System.out.println("aop after returning " + thisJoinPointStaticPart.toLongString());
+		MethodProbe mp = pop();
+		if (mp != null) {
+			mp.end();
+		}
 	}
 
 	after() throwing(Throwable t): methodExecution() {
-		// fire event after method execution which completed with an exception
+		System.out.println("aop after throwing " + thisJoinPointStaticPart.toLongString());
+		MethodProbe mp = pop();
+		if (mp != null) {
+			mp.endWithException(t);
+		}
 	}
 
 	after(): methodExecution() {
-		// fire event after method execution
+		System.out.println("aop after " + thisJoinPointStaticPart.toLongString());
+	}
+
+	private static ThreadLocal<Deque<MethodProbe>> tlProbes = new ThreadLocal<Deque<MethodProbe>>();
+
+	private static void push(MethodProbe mp) {
+		Deque<MethodProbe> probes = tlProbes.get();
+		if (probes == null) {
+			probes = new LinkedList<MethodProbe>();
+			tlProbes.set(probes);
+		}
+		probes.push(mp);
+	}
+
+	private static MethodProbe pop() {
+		Deque<MethodProbe> probes = tlProbes.get();
+		if (probes == null) {
+			return null;
+		}
+		if (probes.size() == 0) {
+			return null;
+		}
+		return probes.pop();
 	}
 }
