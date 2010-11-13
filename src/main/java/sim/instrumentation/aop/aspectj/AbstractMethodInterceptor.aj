@@ -34,15 +34,15 @@ public abstract aspect AbstractMethodInterceptor {
 	public abstract pointcut methodExecution();
 
 	before(): methodExecution() {
-		System.out.println("aop before " + thisJoinPointStaticPart.toLongString());
+		//System.out.println("aop before " + thisJoinPointStaticPart.toLongString());
 		Signature sig = thisJoinPointStaticPart.getSignature();
-		MethodProbe mp = Probe.createMethodProbe(sig.getDeclaringTypeName(), sig.getName());
-		mp.begin();
+		MethodProbe mp = Probe.createMethodProbe(thisJoinPoint.getThis().getClass().getName(), sig.getName());
+		mp.start();
 		push(mp);
 	}
 
 	after() returning: methodExecution() {
-		System.out.println("aop after returning " + thisJoinPointStaticPart.toLongString());
+		//System.out.println("aop after returning " + thisJoinPointStaticPart.toLongString());
 		MethodProbe mp = pop();
 		if (mp != null) {
 			mp.end();
@@ -50,15 +50,11 @@ public abstract aspect AbstractMethodInterceptor {
 	}
 
 	after() throwing(Throwable t): methodExecution() {
-		System.out.println("aop after throwing " + thisJoinPointStaticPart.toLongString());
+		//System.out.println("aop after throwing " + thisJoinPointStaticPart.toLongString());
 		MethodProbe mp = pop();
 		if (mp != null) {
 			mp.endWithException(t);
 		}
-	}
-
-	after(): methodExecution() {
-		System.out.println("aop after " + thisJoinPointStaticPart.toLongString());
 	}
 
 	private static ThreadLocal<Deque<MethodProbe>> tlProbes = new ThreadLocal<Deque<MethodProbe>>();
