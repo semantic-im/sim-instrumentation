@@ -1,5 +1,7 @@
 package sim.instrumentation.data;
 
+import sim.data.MethodMetrics;
+import sim.data.MethodMetricsImpl;
 
 /**
  * Probe for making method specific measurements.
@@ -24,11 +26,11 @@ public class MethodProbe {
 		return this;
 	}
 
-	public void begin() {
+	public void start() {
 		if (ended)
 			throw new IllegalStateException("Method probe already ended!");
+		beginReadMetters(mm);
 		started = true;
-		beginReadMetters();
 	}
 
 	public void end() {
@@ -36,8 +38,9 @@ public class MethodProbe {
 			throw new IllegalStateException("Method probe already ended!");
 		if (!started)
 			throw new IllegalStateException("Method probe not started!");
-		endReadMetters();
+		endReadMetters(mm);
 		ended = true;
+		publishMeasurement(mm);
 	}
 
 	public void endWithException(Throwable t) {
@@ -45,15 +48,20 @@ public class MethodProbe {
 			throw new IllegalStateException("Method probe already ended!");
 		mm.setEndedWithError(true);
 		mm.setException(t.toString());
-		endReadMetters();
+		endReadMetters(mm);
 		ended = true;
+		publishMeasurement(mm);
 	}
 
-	private void beginReadMetters() {
-		Metrics.beginReadMethodMetters(mm);
+	private void beginReadMetters(MethodMetricsImpl measurement) {
+		Metrics.beginReadMethodMetters(measurement);
 	}
 
-	private void endReadMetters() {
-		Metrics.endReadMethodMetters(mm);
+	private void endReadMetters(MethodMetricsImpl measurement) {
+		Metrics.endReadMethodMetters(measurement);
+	}
+
+	private void publishMeasurement(MethodMetrics measurement) {
+		Collector.addMeasurement(measurement);
 	}
 }
