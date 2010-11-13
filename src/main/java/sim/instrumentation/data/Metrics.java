@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import sim.data.MethodMetricsImpl;
+
 /**
  * Provides static methods for reading JVM statistics.
  * 
@@ -33,7 +35,7 @@ import javax.management.ObjectName;
  * 
  */
 class Metrics {
-	private static AtomicBoolean readProcessTotalTime = new AtomicBoolean(true);
+	private static AtomicBoolean canReadProcessTotalTime = new AtomicBoolean(true);
 
 	static {
 		ThreadMXBean t = ManagementFactory.getThreadMXBean();
@@ -71,8 +73,8 @@ class Metrics {
 		mm.setWallClockTime(endTime - mm.getBeginExecutionTime());
 		// thread metrics
 		ThreadMXBean t = ManagementFactory.getThreadMXBean();
-		mm.setThreadTotalCpuTime((t.getCurrentThreadCpuTime() - mm.getThreadTotalCpuTime()) / 1000);
-		mm.setThreadUserCpuTime((t.getCurrentThreadUserTime() - mm.getThreadUserCpuTime()) / 1000);
+		mm.setThreadTotalCpuTime((t.getCurrentThreadCpuTime() - mm.getThreadTotalCpuTime()) / 1000000);
+		mm.setThreadUserCpuTime((t.getCurrentThreadUserTime() - mm.getThreadUserCpuTime()) / 1000000);
 		mm.setThreadSystemCpuTime(mm.getThreadTotalCpuTime() - mm.getThreadUserCpuTime());
 		mm.setThreadCount(t.getTotalStartedThreadCount() - mm.getThreadCount());
 		ThreadInfo ti = t.getThreadInfo(Thread.currentThread().getId());
@@ -81,7 +83,7 @@ class Metrics {
 		mm.setThreadWaitCount(ti.getWaitedCount() - mm.getThreadWaitCount());
 		mm.setThreadWaitTime(ti.getWaitedTime() - mm.getThreadWaitTime());
 		// process time
-		mm.setProcessTotalCpuTime((readProcessCpuTime() - mm.getProcessTotalCpuTime()) / 1000);
+		mm.setProcessTotalCpuTime((readProcessCpuTime() - mm.getProcessTotalCpuTime()) / 1000000);
 		// gcc metrics
 		DoubleLongResult gcc = readGccMetrics();
 		mm.setThreadGccCount(gcc.long1 - mm.getThreadGccCount());
@@ -90,13 +92,13 @@ class Metrics {
 
 	private static long readProcessCpuTime() {
 		long processCpuTime = 0;
-		if (readProcessTotalTime.get()) {
+		if (canReadProcessTotalTime.get()) {
 			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 			try {
 				ObjectName os = new ObjectName(ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME);
 				processCpuTime = ((Long) mbs.getAttribute(os, "ProcessCpuTime")).longValue();
 			} catch (Exception e) {
-				readProcessTotalTime.set(false);
+				canReadProcessTotalTime.set(false);
 			}
 		}
 		return processCpuTime;
