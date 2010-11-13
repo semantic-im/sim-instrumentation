@@ -30,7 +30,7 @@ public class MethodProbeTest {
 	@Test
 	public void testEnd() {
 		MethodProbe p = Probe.createMethodProbe(this.getClass().getName(), "testEnd");
-		p.begin();
+		p.start();
 		delay();
 		p.end();
 	}
@@ -43,7 +43,7 @@ public class MethodProbeTest {
 	@Test
 	public void testEndWithException() {
 		MethodProbe p = Probe.createMethodProbe(this.getClass().getName(), "testEnd");
-		p.begin();
+		p.start();
 		try {
 			delayWithException();
 		} catch (Exception e) {

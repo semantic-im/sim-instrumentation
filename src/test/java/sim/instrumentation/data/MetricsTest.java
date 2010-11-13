@@ -19,6 +19,8 @@ package sim.instrumentation.data;
 import org.junit.Assert;
 import org.junit.Test;
 
+import sim.data.MethodMetricsImpl;
+
 /**
  * @author mcq
  * 
