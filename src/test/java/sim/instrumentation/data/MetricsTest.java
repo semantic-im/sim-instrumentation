@@ -59,7 +59,7 @@ public class MetricsTest {
 		Thread.sleep(50);
 		Thread.sleep(50);
 		Metrics.endReadMethodMetters(mm);
-		Assert.assertEquals(100, mm.getThreadWaitTime());
+		Assert.assertTrue(100 <= mm.getThreadWaitTime());
 		Assert.assertEquals(2, mm.getThreadWaitCount());
 	}
 }
