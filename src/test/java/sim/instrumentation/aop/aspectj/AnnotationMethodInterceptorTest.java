@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package sim.instrumentation.aop.aspectj;
 
@@ -20,18 +20,23 @@ import org.junit.Test;
 
 import sim.instrumentation.annotation.Instrument;
 
-
 /**
  * @author mcq
- *
+ * 
  */
 @Instrument
 public class AnnotationMethodInterceptorTest {
-	@Test	
-	public void testMethod() {}
-	
-	public AnnotationMethodInterceptorTest() {}
-	
-	
-	public void testMethod2() {}
+	@Test
+	public void testMethod() {
+	}
+
+	public AnnotationMethodInterceptorTest() {
+	}
+
+	public void testMethod2() {
+	}
+
+	public static void main(String[] args) {
+		System.out.print("zzz");
+	}
 }

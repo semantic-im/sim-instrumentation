@@ -15,10 +15,12 @@
  */
 package sim.instrumentation.aop.aspectj;
 
+import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.LinkedList;
 
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.reflect.MethodSignature;
 
 import sim.instrumentation.data.MethodProbe;
 import sim.instrumentation.data.Probe;
@@ -35,8 +37,8 @@ public abstract aspect AbstractMethodInterceptor {
 
 	before(): methodExecution() {
 		//System.out.println("aop before " + thisJoinPointStaticPart.toLongString());
-		Signature sig = thisJoinPointStaticPart.getSignature();
-		MethodProbe mp = Probe.createMethodProbe(thisJoinPoint.getThis().getClass().getName(), sig.getName());
+		MethodSignature sig = (MethodSignature)thisJoinPointStaticPart.getSignature();
+		MethodProbe mp = Probe.createMethodProbe(sig.getDeclaringTypeName(), sig.getName());
 		mp.start();
 		push(mp);
 	}
