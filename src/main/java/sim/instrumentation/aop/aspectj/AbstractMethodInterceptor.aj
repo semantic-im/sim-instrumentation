@@ -15,11 +15,9 @@
  */
 package sim.instrumentation.aop.aspectj;
 
-import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.LinkedList;
 
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 
 import sim.instrumentation.data.MethodProbe;
