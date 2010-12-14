@@ -48,6 +48,8 @@ public class Collector {
 	private static class AgentComunicator extends Thread {
 		private static final String agentLocation = "http://localhost:8088/agent";
 		private static final long COLLECT_INTERVAL = 5000;
+		private static final int MAX_METRICS_WRITE = 1000;
+		private static final int TIMEOUT = 5000;
 
 		public AgentComunicator() {
 			super("SIM - AgentComunicator");
@@ -62,32 +64,59 @@ public class Collector {
 				} catch (InterruptedException e) {
 					break;
 				}
-				while (!measurements.isEmpty()) {
-					sendMeasurement(measurements.remove());
-				}
+				sendMeasurements();
 			}
 		}
 
-		private void sendMeasurement(MethodMetrics measurement) {
+		private void sendMeasurements() {
+			ObjectOutputStream agentDataStream = null;
+			BufferedReader agentResponseStream = null;
 			try {
 				URL agentURL = new URL(agentLocation);
 				URLConnection agentConnection = agentURL.openConnection();
+				agentConnection.setConnectTimeout(TIMEOUT);
+				agentConnection.setReadTimeout(TIMEOUT);
 				agentConnection.setDoInput(true);
 				agentConnection.setDoOutput(true);
 				agentConnection.setUseCaches(false);
-				ObjectOutputStream agentDataStream = new ObjectOutputStream(agentConnection.getOutputStream());
-				agentDataStream.writeObject(measurement);
+				agentDataStream = new ObjectOutputStream(agentConnection.getOutputStream());
+				int count = 0;
+				while (!measurements.isEmpty()) {
+					agentDataStream.writeObject(measurements.remove());
+					count++;
+					if (count >= MAX_METRICS_WRITE)
+						break;
+				}
 				agentDataStream.flush();
 				agentDataStream.close();
-				BufferedReader agentResponseStream = new BufferedReader(new InputStreamReader(
+				agentDataStream = null;
+				agentResponseStream = new BufferedReader(new InputStreamReader(
 						agentConnection.getInputStream()));
 				String agentResponse = agentResponseStream.readLine();
 				agentResponseStream.close();
+				agentResponseStream = null;
 				if (!"SUCCESS".equalsIgnoreCase(agentResponse)) {
-					System.out.println("SIM - agent communication failure: " + agentResponse);
+					System.out.println("SIM-instrumentation: agent communication failure1: " + agentResponse);
 				}
 			} catch (IOException e) {
-				System.out.println("SIM - agent communication failure: " + e.getMessage());
+				System.out.println("SIM-instrumentation: agent communication failure2: " + e.getMessage());
+			} finally {
+				if (agentDataStream != null) {
+					try {
+						agentDataStream.close();
+					} catch (IOException e) {
+						System.out.println("SIM-instrumentation: closing agent data stream error: "
+								+ e.getMessage());
+					}
+				}
+				if (agentResponseStream != null) {
+					try {
+						agentResponseStream.close();
+					} catch (IOException e) {
+						System.out.println("SIM-instrumentation: closing agent response stream error: "
+								+ e.getMessage());
+					}
+				}
 			}
 		}
 	}
