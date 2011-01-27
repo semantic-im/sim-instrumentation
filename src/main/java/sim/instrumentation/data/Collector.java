@@ -69,6 +69,8 @@ public class Collector {
 		}
 
 		private void sendMeasurements() {
+			if (measurements.isEmpty())
+				return;
 			ObjectOutputStream agentDataStream = null;
 			BufferedReader agentResponseStream = null;
 			try {

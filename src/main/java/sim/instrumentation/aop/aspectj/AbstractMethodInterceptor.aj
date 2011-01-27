@@ -15,11 +15,14 @@
  */
 package sim.instrumentation.aop.aspectj;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.LinkedList;
 
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 
+import sim.instrumentation.data.ExecutionFlowContext;
 import sim.instrumentation.data.MethodProbe;
 import sim.instrumentation.data.Probe;
 
@@ -32,50 +35,60 @@ import sim.instrumentation.data.Probe;
  */
 public abstract aspect AbstractMethodInterceptor {
 	public abstract pointcut methodExecution();
-
+	
+	protected void beforeInvoke(JoinPoint jp) {}
+	
+	protected void afterInvoke() {}
+	
 	before(): methodExecution() {
 		//System.out.println("aop before " + thisJoinPointStaticPart.toLongString());
-		MethodSignature sig = (MethodSignature)thisJoinPointStaticPart.getSignature();
+		beforeInvoke(thisJoinPoint);
+		Signature sig = thisJoinPointStaticPart.getSignature();
 		MethodProbe mp = Probe.createMethodProbe(sig.getDeclaringTypeName(), sig.getName());
 		mp.start();
-		push(mp);
+		push(mp);		
 	}
 
 	after() returning: methodExecution() {
 		//System.out.println("aop after returning " + thisJoinPointStaticPart.toLongString());
-		MethodProbe mp = pop();
+		MethodProbe mp = pop();				
 		if (mp != null) {
+			copyContext(mp);
 			mp.end();
 		}
+		afterInvoke();
 	}
 
 	after() throwing(Throwable t): methodExecution() {
 		//System.out.println("aop after throwing " + thisJoinPointStaticPart.toLongString());
 		MethodProbe mp = pop();
 		if (mp != null) {
+			copyContext(mp);
 			mp.endWithException(t);
 		}
+		afterInvoke();
 	}
 
-	private static ThreadLocal<Deque<MethodProbe>> tlProbes = new ThreadLocal<Deque<MethodProbe>>();
+	private void copyContext(MethodProbe mp) {
+		mp.addToContext(ExecutionFlowContext.getFullContext());
+	}
+
+	private static final ThreadLocal<Deque<MethodProbe>> tlProbes = new ThreadLocal<Deque<MethodProbe>>();
 
 	private static void push(MethodProbe mp) {
 		Deque<MethodProbe> probes = tlProbes.get();
 		if (probes == null) {
-			probes = new LinkedList<MethodProbe>();
+			probes = new ArrayDeque<MethodProbe>();
 			tlProbes.set(probes);
 		}
-		probes.push(mp);
+		probes.addFirst(mp);
 	}
 
 	private static MethodProbe pop() {
 		Deque<MethodProbe> probes = tlProbes.get();
 		if (probes == null) {
 			return null;
-		}
-		if (probes.size() == 0) {
-			return null;
-		}
-		return probes.pop();
+		}		
+		return probes.pollFirst();
 	}
 }

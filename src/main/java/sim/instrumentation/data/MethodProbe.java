@@ -1,5 +1,6 @@
 package sim.instrumentation.data;
 
+import sim.data.Context;
 import sim.data.MethodMetrics;
 import sim.data.MethodMetricsImpl;
 
@@ -19,10 +20,17 @@ public class MethodProbe {
 		mm = new MethodMetricsImpl(className, methodName);
 	}
 
-	public MethodProbe set(String key, Object value) {
+	public MethodProbe addToContext(String key, Object value) {
 		if (ended)
 			throw new IllegalStateException("Method probe already ended!");
-		mm.set(key, value);
+		mm.addToContext(key, value);
+		return this;
+	}
+
+	public MethodProbe addToContext(Context context) {
+		if (ended)
+			throw new IllegalStateException("Method probe already ended!");
+		mm.addToContext(context);
 		return this;
 	}
 
