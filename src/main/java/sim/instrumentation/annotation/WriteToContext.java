@@ -14,29 +14,25 @@
  * limitations under the License.
  */
 
-package sim.instrumentation.aop.aspectj;
+package sim.instrumentation.annotation;
 
-import org.junit.Test;
-
-import sim.instrumentation.annotation.Instrument;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
+ * Annotation used to mark methods or constructors that, when executed, will
+ * write/publish the parameters and the return value (where available) to the
+ * context of the current execution flow.
+ * 
  * @author mcq
  * 
  */
-@Instrument
-public class AnnotationMethodInterceptorTest {
-	@Test
-	public void testMethod() {
-	}
-
-	public AnnotationMethodInterceptorTest() {
-	}
-
-	public void testMethod2() {
-	}
-
-	public static void main(String[] args) {
-		System.out.print("zzz");
-	}
-}
+@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Documented
+public @interface WriteToContext {}

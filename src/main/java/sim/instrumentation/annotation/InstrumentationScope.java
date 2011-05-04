@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package sim.instrumentation.aop.aspectj;
 
-import sim.instrumentation.annotation.Instrument;
+package sim.instrumentation.annotation;
 
 /**
- * Aspect that identifies methods execution from classes/interfaces marked by
- * Instrument annotation.
+ * Defines the scope of <code>Instrument</code> annotation.
+ * 
+ * <code>ALL</code> will instrument all methods of the type marked by the
+ * <code>Instrument</code> annotation, <code>PUBLIC</code> will instrument just
+ * public methods and <code>PRIVATE</code> will instrument just private methods.
+ * 
+ * @see sim.instrumentation.annotation.Instrument
  * 
  * @author mcq
  * 
  */
-public aspect AnnotationMethodInterceptor extends AbstractMethodInterceptor {
-	public pointcut methodExecution(): within(@Instrument *) && execution(* *(..));
+public enum InstrumentationScope {
+	ALL, PUBLIC, PRIVATE
 }

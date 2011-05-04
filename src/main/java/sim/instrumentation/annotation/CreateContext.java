@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package sim.instrumentation.annotation;
 
 import java.lang.annotation.Documented;
@@ -23,28 +24,21 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation used to mark types (classes, interfaces), methods or constructors
- * that will be instrumented.
+ * Annotation used to mark methods or constructors that will create a new
+ * execution flow context when executed.
  * <p>
- * When it is used on a type, the <code>value</code> property indicates what
- * methods should be instrumented. By default all methods are instrumented (
- * <code>InstrumentationScope.ALL</code>). To instrument just public methods
- * <code>InstrumentationScope.PUBLIC</code> should be used. To instrument just
- * private methods <code>InstrumentationScope.PRIVATE</code> should be used
- * instead. When the annotation is used on a method or constructor then the
- * <code>value</code> property is ignored.
- * 
- * @see sim.instrumentation.annotation.InstrumentationScope
- * @see sim.instrumentation.aop.aspectj.AnnotationMethodInstrumentation
- * @see sim.instrumentation.aop.aspectj.AnnotationTypeInstrumentation
+ * <code>name</code and <tag> properties will define the name and tag for the
+ * created context.
  * 
  * @author mcq
  * 
  */
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ ElementType.METHOD, ElementType.CONSTRUCTOR })
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface Instrument {
-	InstrumentationScope value() default InstrumentationScope.ALL;
+public @interface CreateContext {
+	String name();
+
+	String tag();
 }

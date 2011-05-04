@@ -18,26 +18,29 @@ package sim.instrumentation.data;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Iterator;
 
 import sim.data.Context;
 
 /**
  * Global thread safe storage for keeping track of execution flow context data.
  * 
+ * @see sim.instrumentation.annotation.CreateContext
+ * @see sim.instrumentation.aop.aspectj.AbstractContextCreator
+ * 
  * @author mcq
  * 
  */
-public final class ExecutionFlowContext {
+public final class ContextManager {
 	private static final InheritableThreadLocal<Deque<Context>> storage = new InheritableThreadLocal<Deque<Context>>();
 
-	public static Context createNewContext() {
+	public static Context createNewContext(String name, String tag) {
+		Context parent = getCurrentContext();
 		Deque<Context> s = storage.get();
 		if (s == null) {
 			s = new ArrayDeque<Context>();
 			storage.set(s);
 		}
-		Context m = new Context();
+		Context m = Context.build(name, tag, parent);
 		s.addFirst(m);
 		return m;
 	}
@@ -60,25 +63,7 @@ public final class ExecutionFlowContext {
 		}
 	}
 
-	public static Context getFullContext() {
-		Deque<Context> s = storage.get();
-		if (s == null) {
-			return null;
-		} else {
-			if (s.isEmpty()) {
-				return null;
-			} else {
-				Context fullContext = new Context();
-				for (Iterator<Context> it = s.descendingIterator(); it.hasNext();) {
-					Context c = it.next();
-					fullContext.putAll(c);
-				}
-				return fullContext;
-			}
-		}
-	}
-
-	private ExecutionFlowContext() {
+	private ContextManager() {
 		super();
 	}
 }

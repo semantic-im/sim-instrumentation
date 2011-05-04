@@ -122,5 +122,4 @@ class Metrics {
 		result.long2 = gccTime;
 		return result;
 	}
-
 }

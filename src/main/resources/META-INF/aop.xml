@@ -1,0 +1,15 @@
+<aspectj>
+	<aspects>
+		<aspect name="sim.instrumentation.aop.aspectj.AbstractContextCreator" />
+		<aspect name="sim.instrumentation.aop.aspectj.AbstractContextWriter" />
+		<aspect name="sim.instrumentation.aop.aspectj.AbstractMethodInstrumentation" />
+		<aspect name="sim.instrumentation.aop.aspectj.AnnotationContextCreator" />
+		<aspect name="sim.instrumentation.aop.aspectj.AnnotationContextWriter" />
+		<aspect name="sim.instrumentation.aop.aspectj.AnnotationMethodInstrumentation" />
+		<aspect name="sim.instrumentation.aop.aspectj.AnnotationTypeInstrumentation" />
+		<aspect name="sim.instrumentation.aop.aspectj.AspectsPrecedence" />
+	</aspects>
+	<weaver options="-verbose -showWeaveInfo">
+		<exclude within="sim..*" />
+	</weaver>
+</aspectj>

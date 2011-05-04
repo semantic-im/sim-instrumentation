@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EventProbe {
-
 	private String name;
 	private Map<String, Object> context = new HashMap<String, Object>();
 
@@ -17,7 +16,5 @@ public class EventProbe {
 		return this;
 	}
 
-	public void fire() {
-	}
-
+	public void fire() {}
 }

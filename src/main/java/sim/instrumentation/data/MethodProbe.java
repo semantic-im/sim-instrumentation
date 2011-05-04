@@ -1,6 +1,5 @@
 package sim.instrumentation.data;
 
-import sim.data.Context;
 import sim.data.MethodMetrics;
 import sim.data.MethodMetricsImpl;
 
@@ -11,27 +10,12 @@ import sim.data.MethodMetricsImpl;
  * 
  */
 public class MethodProbe {
-
 	private boolean started = false;
 	private boolean ended = false;
 	private MethodMetricsImpl mm;
 
 	MethodProbe(String className, String methodName) {
 		mm = new MethodMetricsImpl(className, methodName);
-	}
-
-	public MethodProbe addToContext(String key, Object value) {
-		if (ended)
-			throw new IllegalStateException("Method probe already ended!");
-		mm.addToContext(key, value);
-		return this;
-	}
-
-	public MethodProbe addToContext(Context context) {
-		if (ended)
-			throw new IllegalStateException("Method probe already ended!");
-		mm.addToContext(context);
-		return this;
 	}
 
 	public void start() {
@@ -61,12 +45,17 @@ public class MethodProbe {
 		publishMeasurement(mm);
 	}
 
+	public String getName() {
+		return mm.getClassName() + "." + mm.getMethodName();
+	}
+
 	private void beginReadMetters(MethodMetricsImpl measurement) {
 		Metrics.beginReadMethodMetters(measurement);
 	}
 
 	private void endReadMetters(MethodMetricsImpl measurement) {
 		Metrics.endReadMethodMetters(measurement);
+		mm.setContext(ContextManager.getCurrentContext());
 	}
 
 	private void publishMeasurement(MethodMetrics measurement) {
