@@ -1,5 +1,8 @@
 package sim.instrumentation.data;
 
+import java.util.UUID;
+
+import sim.data.ApplicationId;
 import sim.data.MethodMetrics;
 import sim.data.MethodMetricsImpl;
 
@@ -10,12 +13,20 @@ import sim.data.MethodMetricsImpl;
  * 
  */
 public class MethodProbe {
+	private static ApplicationId applicationID;
+	static {
+		String appName = System.getProperty("sim.application.name");
+		if (appName == null)
+			appName = "not set";
+		String appId = UUID.randomUUID().toString();
+		applicationID = new ApplicationId(appId, appName);
+	}
 	private boolean started = false;
 	private boolean ended = false;
 	private MethodMetricsImpl mm;
 
 	MethodProbe(String className, String methodName) {
-		mm = new MethodMetricsImpl(className, methodName);
+		mm = new MethodMetricsImpl(applicationID, className, methodName);
 	}
 
 	public void start() {

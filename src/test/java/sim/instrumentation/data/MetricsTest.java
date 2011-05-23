@@ -19,6 +19,7 @@ package sim.instrumentation.data;
 import org.junit.Assert;
 import org.junit.Test;
 
+import sim.data.ApplicationId;
 import sim.data.MethodMetricsImpl;
 
 /**
@@ -26,6 +27,7 @@ import sim.data.MethodMetricsImpl;
  * 
  */
 public class MetricsTest {
+	private static ApplicationId appId = new ApplicationId("123", "test");
 
 	/**
 	 * Test method for WallClockTime calculation by
@@ -35,7 +37,7 @@ public class MetricsTest {
 	 */
 	@Test
 	public void testWallClockTime() throws Exception {
-		MethodMetricsImpl mm = new MethodMetricsImpl(this.getClass().getName(), "testWallClockTime");
+		MethodMetricsImpl mm = new MethodMetricsImpl(appId, this.getClass().getName(), "testWallClockTime");
 		Metrics.beginReadMethodMetters(mm);
 		Assert.assertFalse(0 == mm.getBeginExecutionTime());
 		Thread.sleep(100);
@@ -52,7 +54,8 @@ public class MetricsTest {
 	 */
 	@Test
 	public void testThreadWaitTimeAndCount() throws Exception {
-		MethodMetricsImpl mm = new MethodMetricsImpl(this.getClass().getName(), "testThreadWaitTimeAndCount");
+		MethodMetricsImpl mm = new MethodMetricsImpl(appId, this.getClass().getName(),
+				"testThreadWaitTimeAndCount");
 		Metrics.beginReadMethodMetters(mm);
 		Assert.assertFalse(0L == mm.getThreadWaitTime());
 		Assert.assertFalse(0L == mm.getThreadWaitCount());
