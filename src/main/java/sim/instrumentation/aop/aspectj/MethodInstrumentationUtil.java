@@ -38,12 +38,10 @@ import sim.instrumentation.data.Probe;
  * @author mcq
  * 
  */
-final class MethodInstrumentationUtil {
+public final class MethodInstrumentationUtil {
 	private static final ThreadLocal<Deque<MethodProbe>> tlProbes = new ThreadLocal<Deque<MethodProbe>>();
 
 	static void beforeInvoke(JoinPoint jp) {
-		// System.out.println("aop before " +
-		// thisJoinPointStaticPart.toLongString());
 		Signature sig = jp.getStaticPart().getSignature();
 		MethodProbe mp = Probe.createMethodProbe(sig.getDeclaringTypeName(), sig.getName());
 		mp.start();
@@ -51,8 +49,6 @@ final class MethodInstrumentationUtil {
 	}
 
 	static void afterInvoke(Throwable t) {
-		// System.out.println("aop after returning " +
-		// thisJoinPointStaticPart.toLongString());
 		MethodProbe mp = pop();
 		if (mp != null) {
 			if (t == null)
@@ -71,7 +67,7 @@ final class MethodInstrumentationUtil {
 	 * @param methodName the name of the tested method
 	 * @return true if the tested method is instrumented, false otherwise
 	 */
-	static boolean isMethodInstrumented(String className, String methodName) {
+	public static boolean isMethodInstrumented(String className, String methodName) {
 		Deque<MethodProbe> probes = tlProbes.get();
 		if (probes == null) {
 			return false;
