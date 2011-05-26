@@ -16,6 +16,7 @@
 package sim.instrumentation.aop.aspectj;
 
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 
 /**
  * Base abstract aspect used to instrument code indicated by pointcut 
@@ -45,14 +46,17 @@ import org.aspectj.lang.JoinPoint;
 public abstract aspect AbstractMethodInstrumentation {
 	public abstract pointcut methodsToInstrument();
 	
+	@SuppressAjWarnings
 	before(): methodsToInstrument() {
 		beforeInvoke(thisJoinPoint);
 	}
 
+	@SuppressAjWarnings
 	after() returning: methodsToInstrument() {
 		afterInvoke(thisJoinPoint, null);
 	}
 
+	@SuppressAjWarnings
 	after() throwing(Throwable t): methodsToInstrument() {
 		afterInvoke(thisJoinPoint, t);
 	}

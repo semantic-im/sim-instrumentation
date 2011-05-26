@@ -18,6 +18,7 @@ package sim.instrumentation.aop.aspectj;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 
 import sim.instrumentation.data.ContextManager;
 
@@ -56,10 +57,12 @@ import sim.instrumentation.data.ContextManager;
 public abstract aspect AbstractContextCreator {
 	public abstract pointcut methodToCreateNewContext();
 	
+	@SuppressAjWarnings
 	before(): methodToCreateNewContext() {
 		beforeInvoke(thisJoinPoint);
 	}
 	
+	@SuppressAjWarnings
 	after(): methodToCreateNewContext() {
 		afterInvoke(thisJoinPoint);
 	}

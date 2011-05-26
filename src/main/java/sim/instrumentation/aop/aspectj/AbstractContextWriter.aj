@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.Signature;
+import org.aspectj.lang.annotation.SuppressAjWarnings;
 import org.aspectj.lang.reflect.CatchClauseSignature;
 import org.aspectj.lang.reflect.CodeSignature;
 import org.aspectj.lang.reflect.FieldSignature;
@@ -63,14 +64,17 @@ import sim.instrumentation.data.ContextManager;
 public abstract aspect AbstractContextWriter {
 	public abstract pointcut placeToTriggerTheContextWrite();
 	
+	@SuppressAjWarnings
 	before(): placeToTriggerTheContextWrite() {
 		beforeInvoke(thisJoinPoint);
 	}
 	
+	@SuppressAjWarnings
 	after() returning(Object result): placeToTriggerTheContextWrite() {
 		afterReturningInvoke(thisJoinPoint, result);
 	}
 	
+	@SuppressAjWarnings
 	after(): placeToTriggerTheContextWrite() {
 		afterInvoke(thisJoinPoint);
 	}
