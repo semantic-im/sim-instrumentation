@@ -24,6 +24,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import sim.data.MethodMetrics;
 
 /**
@@ -35,8 +38,10 @@ import sim.data.MethodMetrics;
  */
 public class Collector {
 	private static ConcurrentLinkedQueue<MethodMetrics> measurements = new ConcurrentLinkedQueue<MethodMetrics>();
+	private static Logger log = LoggerFactory.getLogger(Collector.class);
 
 	public static void addMeasurement(MethodMetrics measurement) {
+		log.info(measurement.toString());
 		measurements.add(measurement);
 	}
 
