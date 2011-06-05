@@ -39,10 +39,13 @@ import sim.data.MethodMetrics;
 public class Collector {
 	private static ConcurrentLinkedQueue<MethodMetrics> measurements = new ConcurrentLinkedQueue<MethodMetrics>();
 	private static Logger log = LoggerFactory.getLogger(Collector.class);
+	private static long MEASURABLE_THRESHOLD = 100;
 
 	public static void addMeasurement(MethodMetrics measurement) {
-		log.info(measurement.toString());
-		measurements.add(measurement);
+		if (measurement.getWallClockTime() > MEASURABLE_THRESHOLD) {
+			log.info(measurement.toString());
+			measurements.add(measurement);
+		}
 	}
 
 	static {
