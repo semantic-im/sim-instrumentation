@@ -9,7 +9,7 @@
 		<aspect name="sim.instrumentation.aop.aspectj.AnnotationTypeInstrumentation" />
 		<aspect name="sim.instrumentation.aop.aspectj.AspectsPrecedence" />
 	</aspects>
-	<weaver options="-verbose -showWeaveInfo">
+	<weaver>
 		<exclude within="sim..*" />
 	</weaver>
 </aspectj>
