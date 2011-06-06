@@ -43,7 +43,8 @@ public class Collector {
 
 	public static void addMeasurement(MethodMetrics measurement) {
 		if (measurement.getWallClockTime() > MEASURABLE_THRESHOLD) {
-			log.info(measurement.toString());
+			if (log.isDebugEnabled())
+				log.debug(measurement.toString());
 			measurements.add(measurement);
 		}
 	}
