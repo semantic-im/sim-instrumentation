@@ -40,7 +40,7 @@ public final class ContextManager {
 			s = new ArrayDeque<Context>();
 			storage.set(s);
 		}
-		Context m = Context.build(name, tag, parent);
+		Context m = Context.create(name, tag, parent);
 		s.addFirst(m);
 		return m;
 	}
@@ -50,7 +50,12 @@ public final class ContextManager {
 		if (s == null) {
 			return null;
 		} else {
-			return s.pollFirst();
+			Context c = s.pollFirst();
+			if (c != null) {
+				c.endContext();
+				Collector.addMeasurement(c);
+			}
+			return c;
 		}
 	}
 

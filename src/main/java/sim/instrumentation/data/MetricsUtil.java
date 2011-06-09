@@ -34,7 +34,7 @@ import sim.data.MethodMetricsImpl;
  * @author mcq
  * 
  */
-class Metrics {
+class MetricsUtil {
 	private static AtomicBoolean canReadProcessTotalTime = new AtomicBoolean(true);
 
 	static {

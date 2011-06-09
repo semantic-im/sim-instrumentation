@@ -3,6 +3,7 @@ package sim.instrumentation.data;
 import java.util.UUID;
 
 import sim.data.ApplicationId;
+import sim.data.Context;
 import sim.data.MethodMetrics;
 import sim.data.MethodMetricsImpl;
 
@@ -61,12 +62,14 @@ public class MethodProbe {
 	}
 
 	private void beginReadMetters(MethodMetricsImpl measurement) {
-		Metrics.beginReadMethodMetters(measurement);
+		MetricsUtil.beginReadMethodMetters(measurement);
 	}
 
 	private void endReadMetters(MethodMetricsImpl measurement) {
-		Metrics.endReadMethodMetters(measurement);
-		mm.setContext(ContextManager.getCurrentContext());
+		MetricsUtil.endReadMethodMetters(measurement);
+		Context c = ContextManager.getCurrentContext();
+		if (c != null)
+			mm.setContextId(c.getId());
 	}
 
 	private void publishMeasurement(MethodMetrics measurement) {

@@ -31,24 +31,24 @@ public class MetricsTest {
 
 	/**
 	 * Test method for WallClockTime calculation by
-	 * {@link sim.instrumentation.data.Metrics}.
+	 * {@link sim.instrumentation.data.MetricsUtil}.
 	 * 
 	 * @throws Exception
 	 */
 	@Test
 	public void testWallClockTime() throws Exception {
 		MethodMetricsImpl mm = new MethodMetricsImpl(appId, this.getClass().getName(), "testWallClockTime");
-		Metrics.beginReadMethodMetters(mm);
+		MetricsUtil.beginReadMethodMetters(mm);
 		Assert.assertFalse(0 == mm.getBeginExecutionTime());
 		Thread.sleep(100);
-		Metrics.endReadMethodMetters(mm);
+		MetricsUtil.endReadMethodMetters(mm);
 		Assert.assertTrue(100 <= mm.getWallClockTime());
 		Assert.assertEquals(mm.getEndExecutionTime() - mm.getBeginExecutionTime(), mm.getWallClockTime());
 	}
 
 	/**
 	 * Test method for testThreadWaitTimeAndCount calculation by
-	 * {@link sim.instrumentation.data.Metrics}.
+	 * {@link sim.instrumentation.data.MetricsUtil}.
 	 * 
 	 * @throws Exception
 	 */
@@ -56,12 +56,12 @@ public class MetricsTest {
 	public void testThreadWaitTimeAndCount() throws Exception {
 		MethodMetricsImpl mm = new MethodMetricsImpl(appId, this.getClass().getName(),
 				"testThreadWaitTimeAndCount");
-		Metrics.beginReadMethodMetters(mm);
+		MetricsUtil.beginReadMethodMetters(mm);
 		Assert.assertFalse(0L == mm.getThreadWaitTime());
 		Assert.assertFalse(0L == mm.getThreadWaitCount());
 		Thread.sleep(50);
 		Thread.sleep(50);
-		Metrics.endReadMethodMetters(mm);
+		MetricsUtil.endReadMethodMetters(mm);
 		Assert.assertTrue(100 <= mm.getThreadWaitTime());
 		Assert.assertEquals(2, mm.getThreadWaitCount());
 	}
