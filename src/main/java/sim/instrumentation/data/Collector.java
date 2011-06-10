@@ -119,24 +119,23 @@ public class Collector {
 				agentResponseStream.close();
 				agentResponseStream = null;
 				if (!"SUCCESS".equalsIgnoreCase(agentResponse)) {
-					System.out.println("SIM-instrumentation: agent communication failure1: " + agentResponse);
+					log.error("SIM-instrumentation: agent communication failure1: " + agentResponse);
 				}
 			} catch (IOException e) {
-				System.out.println("SIM-instrumentation: agent communication failure2: " + e.getMessage());
+				log.error("SIM-instrumentation: agent communication failure2: " + e.getMessage());
 			} finally {
 				if (agentDataStream != null) {
 					try {
 						agentDataStream.close();
 					} catch (IOException e) {
-						System.out.println("SIM-instrumentation: closing agent data stream error: "
-								+ e.getMessage());
+						log.error("SIM-instrumentation: closing agent data stream error: " + e.getMessage());
 					}
 				}
 				if (agentResponseStream != null) {
 					try {
 						agentResponseStream.close();
 					} catch (IOException e) {
-						System.out.println("SIM-instrumentation: closing agent response stream error: "
+						log.error("SIM-instrumentation: closing agent response stream error: "
 								+ e.getMessage());
 					}
 				}

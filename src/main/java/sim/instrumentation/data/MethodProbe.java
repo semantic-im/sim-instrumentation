@@ -16,9 +16,7 @@ import sim.data.MethodMetricsImpl;
 public class MethodProbe {
 	private static ApplicationId applicationID;
 	static {
-		String appName = System.getProperty("sim.application.name");
-		if (appName == null)
-			appName = "not set";
+		String appName = System.getProperty("sim.application.name", "not set");
 		String appId = UUID.randomUUID().toString();
 		applicationID = new ApplicationId(appId, appName);
 	}
