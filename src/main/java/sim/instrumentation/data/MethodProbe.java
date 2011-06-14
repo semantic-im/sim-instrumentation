@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import sim.data.ApplicationId;
 import sim.data.Context;
+import sim.data.MethodImpl;
 import sim.data.MethodMetrics;
 import sim.data.MethodMetricsImpl;
 
@@ -25,7 +26,7 @@ public class MethodProbe {
 	private MethodMetricsImpl mm;
 
 	MethodProbe(String className, String methodName) {
-		mm = new MethodMetricsImpl(applicationID, className, methodName);
+		mm = new MethodMetricsImpl(new MethodImpl(applicationID, className, methodName));
 	}
 
 	public void start() {
@@ -56,7 +57,7 @@ public class MethodProbe {
 	}
 
 	public String getName() {
-		return mm.getClassName() + "." + mm.getMethodName();
+		return mm.getMethod().getClassName() + "." + mm.getMethod().getMethodName();
 	}
 
 	private void beginReadMetters(MethodMetricsImpl measurement) {

@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import sim.data.ApplicationId;
+import sim.data.MethodImpl;
 import sim.data.MethodMetricsImpl;
 
 /**
@@ -37,7 +38,8 @@ public class MetricsTest {
 	 */
 	@Test
 	public void testWallClockTime() throws Exception {
-		MethodMetricsImpl mm = new MethodMetricsImpl(appId, this.getClass().getName(), "testWallClockTime");
+		MethodMetricsImpl mm = new MethodMetricsImpl(new MethodImpl(appId, this.getClass().getName(),
+				"testWallClockTime"));
 		MetricsUtil.beginReadMethodMetters(mm);
 		Assert.assertFalse(0 == mm.getBeginExecutionTime());
 		Thread.sleep(100);
@@ -54,8 +56,8 @@ public class MetricsTest {
 	 */
 	@Test
 	public void testThreadWaitTimeAndCount() throws Exception {
-		MethodMetricsImpl mm = new MethodMetricsImpl(appId, this.getClass().getName(),
-				"testThreadWaitTimeAndCount");
+		MethodMetricsImpl mm = new MethodMetricsImpl(new MethodImpl(appId, this.getClass().getName(),
+				"testThreadWaitTimeAndCount"));
 		MetricsUtil.beginReadMethodMetters(mm);
 		Assert.assertFalse(0L == mm.getThreadWaitTime());
 		Assert.assertFalse(0L == mm.getThreadWaitCount());
