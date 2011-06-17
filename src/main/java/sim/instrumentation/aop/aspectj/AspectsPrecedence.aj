@@ -23,5 +23,5 @@ package sim.instrumentation.aop.aspectj;
  *
  */
 final aspect AspectsPrecedence {
-	declare precedence: AbstractContextCreator+, AbstractMethodInstrumentation+, AbstractContextWriter+, *;
+	declare precedence: AbstractContextCreator+, AbstractContextWriter+, AbstractMethodInstrumentation+, *;
 }
