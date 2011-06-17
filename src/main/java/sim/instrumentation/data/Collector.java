@@ -39,14 +39,13 @@ import sim.data.Metrics;
  * 
  */
 public class Collector {
-	private static ConcurrentLinkedQueue<Metrics> measurements = new ConcurrentLinkedQueue<Metrics>();
 	private static Logger log = LoggerFactory.getLogger(Collector.class);
-	private static long MEASURABLE_THRESHOLD = 100;
+	private static ConcurrentLinkedQueue<Metrics> measurements = new ConcurrentLinkedQueue<Metrics>();
 
 	public static void addMeasurement(MethodMetrics methodMetric) {
 		if (methodMetric == null)
 			return;
-		if (methodMetric.getWallClockTime() > MEASURABLE_THRESHOLD) {
+		if (methodMetric.getWallClockTime() > ConfigParams.MEASURABLE_THRESHOLD) {
 			if (log.isDebugEnabled())
 				log.debug(methodMetric.toString());
 			measurements.add(methodMetric);
@@ -67,11 +66,6 @@ public class Collector {
 	}
 
 	private static class AgentComunicator extends Thread {
-		private static final String agentLocation = "http://localhost:8088/agent";
-		private static final long COLLECT_INTERVAL = 5000;
-		private static final int MAX_METRICS_WRITE = 1000;
-		private static final int TIMEOUT = 5000;
-
 		public AgentComunicator() {
 			super("SIM - AgentComunicator");
 			setDaemon(true);
@@ -81,7 +75,7 @@ public class Collector {
 		public void run() {
 			while (true) {
 				try {
-					sleep(COLLECT_INTERVAL);
+					sleep(ConfigParams.COLLECT_INTERVAL);
 				} catch (InterruptedException e) {
 					break;
 				}
@@ -95,10 +89,10 @@ public class Collector {
 			ObjectOutputStream agentDataStream = null;
 			BufferedReader agentResponseStream = null;
 			try {
-				URL agentURL = new URL(agentLocation);
+				URL agentURL = new URL(ConfigParams.AGENT_LOCATION);
 				URLConnection agentConnection = agentURL.openConnection();
-				agentConnection.setConnectTimeout(TIMEOUT);
-				agentConnection.setReadTimeout(TIMEOUT);
+				agentConnection.setConnectTimeout(ConfigParams.TIMEOUT);
+				agentConnection.setReadTimeout(ConfigParams.TIMEOUT);
 				agentConnection.setDoInput(true);
 				agentConnection.setDoOutput(true);
 				agentConnection.setUseCaches(false);
@@ -107,7 +101,7 @@ public class Collector {
 				while (!measurements.isEmpty()) {
 					agentDataStream.writeObject(measurements.remove());
 					count++;
-					if (count >= MAX_METRICS_WRITE)
+					if (count >= ConfigParams.MAX_METRICS_WRITE)
 						break;
 				}
 				agentDataStream.flush();
