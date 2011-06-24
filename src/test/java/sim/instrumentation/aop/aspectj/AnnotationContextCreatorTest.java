@@ -17,7 +17,6 @@
 package sim.instrumentation.aop.aspectj;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -43,6 +42,6 @@ public class AnnotationContextCreatorTest {
 	private void method1(Context parentContext) {
 		assertEquals("context2", ContextManager.getCurrentContext().getName());
 		assertEquals("tag2", ContextManager.getCurrentContext().getTag());
-		assertTrue(parentContext == ContextManager.getCurrentContext().getParent());
+		assertEquals(parentContext.getId(), ContextManager.getCurrentContext().getParentContextId());
 	}
 }

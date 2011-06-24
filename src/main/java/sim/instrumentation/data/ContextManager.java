@@ -31,18 +31,20 @@ import sim.data.Context;
  * 
  */
 public final class ContextManager {
-	private static final InheritableThreadLocal<Deque<Context>> storage = new InheritableThreadLocal<Deque<Context>>();
+	private static final ThreadLocal<Deque<Context>> storage = new ThreadLocal<Deque<Context>>();
+	private static final ThreadLocal<String> parentContextId = new ThreadLocal<String>();
 
 	public static Context createNewContext(String name, String tag) {
-		Context parent = getCurrentContext();
+		String contextParentId = getParentContextId();
 		Deque<Context> s = storage.get();
 		if (s == null) {
 			s = new ArrayDeque<Context>();
 			storage.set(s);
 		}
-		Context m = Context.create(name, tag, parent);
-		s.addFirst(m);
-		return m;
+		Context c = Context.create(name, tag, contextParentId);
+		setParentContextId(c.getId());
+		s.addFirst(c);
+		return c;
 	}
 
 	public static Context destroyCurrentContext() {
@@ -68,7 +70,15 @@ public final class ContextManager {
 		}
 	}
 
+	public static void setParentContextId(String contextId) {
+		parentContextId.set(contextId);
+	}
+
 	private ContextManager() {
 		super();
+	}
+
+	private static String getParentContextId() {
+		return parentContextId.get();
 	}
 }
