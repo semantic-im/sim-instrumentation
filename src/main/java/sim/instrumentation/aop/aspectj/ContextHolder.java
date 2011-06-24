@@ -12,16 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package sim.instrumentation.aop.aspectj;
 
+import sim.data.Context;
+
 /**
- * Defines the precedence of aspects (in case they give advice to the same join point).
+ * Signature for classes that will hold Context.
+ * 
+ * This is used to do Context propagation through Thread/Process/Computer
+ * boundaries.
  * 
  * @author mcq
- *
+ * 
  */
-final aspect AspectsPrecedence {
-	declare precedence: AbstractContextCreator+, AbstractContextPropagator+, AbstractContextWriter+, AbstractMethodInstrumentation+, *;
+public interface ContextHolder {
+	public Context getContext();
+
+	public void setContext(Context c);
 }

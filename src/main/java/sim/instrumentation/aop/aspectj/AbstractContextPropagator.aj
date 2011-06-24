@@ -16,12 +16,36 @@
 
 package sim.instrumentation.aop.aspectj;
 
+import org.aspectj.lang.annotation.SuppressAjWarnings;
+
+import sim.data.Context;
+
 /**
- * Defines the precedence of aspects (in case they give advice to the same join point).
+ * Aspect used to do Context propagation through Thread/Process/Computer
+ * boundaries.
+ * 
+ * @see sim.instrumentation.aop.aspectj.ContextHolder
  * 
  * @author mcq
  *
  */
-final aspect AspectsPrecedence {
-	declare precedence: AbstractContextCreator+, AbstractContextPropagator+, AbstractContextWriter+, AbstractMethodInstrumentation+, *;
+public abstract aspect AbstractContextPropagator {
+	
+	public abstract pointcut methodToSendContext(); 
+	public abstract pointcut methodToReceiveContext();
+	
+	private Context ContextHolder.context;
+	
+	public Context ContextHolder.getContext() {
+		return this.context;
+	}
+	
+	public void ContextHolder.setContext(Context c) {
+		this.context = c;
+	}
+	
+	@SuppressAjWarnings
+	before(): methodToSendContext() {
+		
+	}
 }
