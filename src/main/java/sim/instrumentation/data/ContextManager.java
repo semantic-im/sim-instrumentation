@@ -32,17 +32,18 @@ import sim.data.Context;
  */
 public final class ContextManager {
 	private static final ThreadLocal<Deque<Context>> storage = new ThreadLocal<Deque<Context>>();
-	private static final ThreadLocal<String> parentContextId = new ThreadLocal<String>();
 
 	public static Context createNewContext(String name, String tag) {
-		String contextParentId = getParentContextId();
 		Deque<Context> s = storage.get();
 		if (s == null) {
 			s = new ArrayDeque<Context>();
 			storage.set(s);
 		}
-		Context c = Context.create(name, tag, contextParentId);
-		setParentContextId(c.getId());
+		Context parent = getCurrentContext();
+		String parentId = null;
+		if (parent != null)
+			parentId = parent.getId();
+		Context c = Context.create(name, tag, parentId);
 		s.addFirst(c);
 		return c;
 	}
@@ -70,15 +71,18 @@ public final class ContextManager {
 		}
 	}
 
-	public static void setParentContextId(String contextId) {
-		parentContextId.set(contextId);
+	public static void setCurrentContext(Context c) {
+		if (c == null)
+			return;
+		Deque<Context> s = storage.get();
+		if (s == null) {
+			s = new ArrayDeque<Context>();
+			storage.set(s);
+		}
+		s.addFirst(c);
 	}
 
 	private ContextManager() {
 		super();
-	}
-
-	private static String getParentContextId() {
-		return parentContextId.get();
 	}
 }
