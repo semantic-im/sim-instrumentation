@@ -22,6 +22,7 @@ import org.junit.Test;
 import sim.data.ApplicationId;
 import sim.data.MethodImpl;
 import sim.data.MethodMetricsImpl;
+import sim.data.PlatformMetricsImpl;
 
 /**
  * @author mcq
@@ -66,5 +67,28 @@ public class MetricsTest {
 		MetricsUtil.endReadMethodMetters(mm);
 		Assert.assertTrue(100 <= mm.getThreadWaitTime());
 		Assert.assertEquals(2, mm.getThreadWaitCount());
+	}
+
+	@Test
+	public void testReadPlatformMetrics() throws Exception {
+		PlatformMetricsImpl pm = MetricsUtil.readPlatformMetrics(null);
+		Assert.assertFalse(0L == pm.getCpuTime());
+		Assert.assertFalse(0L == pm.getCreationTime());
+		Assert.assertFalse(0L == pm.getUptime());
+		Assert.assertFalse(0L == pm.getUsedMemory());
+		Assert.assertFalse(0.0d == pm.getAvgCpuUsage());
+		Assert.assertTrue(0.0d == pm.getCpuUsage());
+		long x = 0;
+		for (int i = 0; i < 1000000; i++) {
+			x += i;
+		}
+		System.out.print(x);
+		PlatformMetricsImpl pm2 = MetricsUtil.readPlatformMetrics(pm);
+		Assert.assertFalse(0L == pm2.getCpuTime());
+		Assert.assertFalse(0L == pm2.getCreationTime());
+		Assert.assertFalse(0L == pm2.getUptime());
+		Assert.assertFalse(0L == pm2.getUsedMemory());
+		Assert.assertFalse(0.0d == pm2.getAvgCpuUsage());
+		Assert.assertFalse(0.0d == pm2.getCpuUsage());
 	}
 }

@@ -18,6 +18,8 @@ package sim.instrumentation.data;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 import java.util.List;
@@ -27,6 +29,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import sim.data.MethodMetricsImpl;
+import sim.data.PlatformMetricsImpl;
 
 /**
  * Provides static methods for reading JVM statistics.
@@ -45,7 +48,7 @@ class MetricsUtil {
 			t.setThreadContentionMonitoringEnabled(true);
 	}
 
-	public static void beginReadMethodMetters(MethodMetricsImpl mm) {
+	static void beginReadMethodMetters(MethodMetricsImpl mm) {
 		// wall clock time
 		mm.setBeginExecutionTime(System.currentTimeMillis());
 		// thread metrics
@@ -66,7 +69,7 @@ class MetricsUtil {
 		mm.setThreadGccTime(gcc.long2);
 	}
 
-	public static void endReadMethodMetters(MethodMetricsImpl mm) {
+	static void endReadMethodMetters(MethodMetricsImpl mm) {
 		// wall clock time
 		long endTime = System.currentTimeMillis();
 		mm.setEndExecutionTime(endTime);
@@ -88,6 +91,34 @@ class MetricsUtil {
 		DoubleLongResult gcc = readGccMetrics();
 		mm.setThreadGccCount(gcc.long1 - mm.getThreadGccCount());
 		mm.setThreadGccTime(gcc.long2 - mm.getThreadGccTime());
+	}
+
+	static PlatformMetricsImpl readPlatformMetrics(PlatformMetricsImpl previous) {
+		PlatformMetricsImpl result = new PlatformMetricsImpl(ConfigParams.APPLICATION_ID);
+		// gcc metrics
+		DoubleLongResult gcc = readGccMetrics();
+		result.setGccCount(gcc.long1);
+		result.setGccTime(gcc.long2);
+		// uptime
+		RuntimeMXBean r = ManagementFactory.getRuntimeMXBean();
+		long uptime = r.getUptime();
+		result.setUptime(uptime);
+		// cpu time
+		long cpuTime = readProcessCpuTime() / 1000000;
+		result.setCpuTime(cpuTime);
+		// avg cpu usage
+		double avgCpu = ((double) (cpuTime * 100) / (double) uptime);
+		result.setAvgCpuUsage(avgCpu);
+		// cpu usage
+		double cpu = 0;
+		if (previous != null) {
+			cpu = (double) ((cpuTime - previous.getCpuTime()) * 100)
+					/ (double) (result.getCreationTime() - previous.getCreationTime());
+		}
+		result.setCpuUsage(cpu);
+		// memory used
+		result.setUsedMemory(readUsedMemory());
+		return result;
 	}
 
 	private static long readProcessCpuTime() {
@@ -120,6 +151,12 @@ class MetricsUtil {
 		DoubleLongResult result = new DoubleLongResult();
 		result.long1 = gccCount;
 		result.long2 = gccTime;
+		return result;
+	}
+
+	private static long readUsedMemory() {
+		MemoryMXBean m = ManagementFactory.getMemoryMXBean();
+		long result = m.getHeapMemoryUsage().getUsed() + m.getNonHeapMemoryUsage().getUsed();
 		return result;
 	}
 }
