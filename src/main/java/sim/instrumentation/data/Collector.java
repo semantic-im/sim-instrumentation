@@ -43,8 +43,8 @@ import sim.data.PlatformMetrics;
  * 
  */
 public class Collector {
-	private static Logger log = LoggerFactory.getLogger(Collector.class);
-	private static ConcurrentLinkedQueue<Metrics> measurements = new ConcurrentLinkedQueue<Metrics>();
+	private static final Logger log = LoggerFactory.getLogger(Collector.class);
+	private static final ConcurrentLinkedQueue<Metrics> measurements = new ConcurrentLinkedQueue<Metrics>();
 
 	public static void addMeasurement(MethodMetrics methodMetric) {
 		if (methodMetric == null)

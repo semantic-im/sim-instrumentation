@@ -72,22 +72,29 @@ public class MetricsTest {
 	@Test
 	public void testReadPlatformMetrics() throws Exception {
 		PlatformMetricsImpl pm = MetricsUtil.readPlatformMetrics(null);
+		Assert.assertFalse(0L == pm.getTotalCpuTime());
 		Assert.assertFalse(0L == pm.getCpuTime());
+		Assert.assertTrue(pm.getTotalCpuTime() == pm.getCpuTime());
 		Assert.assertFalse(0L == pm.getCreationTime());
 		Assert.assertFalse(0L == pm.getUptime());
 		Assert.assertFalse(0L == pm.getUsedMemory());
+		Assert.assertFalse(0L == pm.getFreeMemory());
 		Assert.assertFalse(0.0d == pm.getAvgCpuUsage());
-		Assert.assertTrue(0.0d == pm.getCpuUsage());
+		Assert.assertFalse(0.0d == pm.getCpuUsage());
 		long x = 0;
 		for (int i = 0; i < 1000000; i++) {
 			x += i;
 		}
 		System.out.print(x);
+		System.gc();
 		PlatformMetricsImpl pm2 = MetricsUtil.readPlatformMetrics(pm);
+		Assert.assertFalse(0L == pm2.getTotalCpuTime());
+		Assert.assertTrue(pm2.getTotalCpuTime() > pm.getTotalCpuTime());
 		Assert.assertFalse(0L == pm2.getCpuTime());
 		Assert.assertFalse(0L == pm2.getCreationTime());
 		Assert.assertFalse(0L == pm2.getUptime());
 		Assert.assertFalse(0L == pm2.getUsedMemory());
+		Assert.assertFalse(0L == pm.getFreeMemory());
 		Assert.assertFalse(0.0d == pm2.getAvgCpuUsage());
 		Assert.assertFalse(0.0d == pm2.getCpuUsage());
 	}

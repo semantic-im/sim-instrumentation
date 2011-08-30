@@ -38,7 +38,7 @@ import sim.data.PlatformMetricsImpl;
  * 
  */
 class MetricsUtil {
-	private static AtomicBoolean canReadProcessTotalTime = new AtomicBoolean(true);
+	private static final AtomicBoolean canReadProcessTotalTime = new AtomicBoolean(true);
 
 	static {
 		ThreadMXBean t = ManagementFactory.getThreadMXBean();
@@ -62,7 +62,7 @@ class MetricsUtil {
 		mm.setThreadWaitCount(ti.getWaitedCount());
 		mm.setThreadWaitTime(ti.getWaitedTime());
 		// process time
-		mm.setProcessTotalCpuTime(readProcessCpuTime());
+		mm.setProcessTotalCpuTime(readProcessTotalCpuTime());
 		// gcc metrics
 		DoubleLongResult gcc = readGccMetrics();
 		mm.setThreadGccCount(gcc.long1);
@@ -86,7 +86,7 @@ class MetricsUtil {
 		mm.setThreadWaitCount(ti.getWaitedCount() - mm.getThreadWaitCount());
 		mm.setThreadWaitTime(ti.getWaitedTime() - mm.getThreadWaitTime());
 		// process time
-		mm.setProcessTotalCpuTime((readProcessCpuTime() - mm.getProcessTotalCpuTime()) / 1000000);
+		mm.setProcessTotalCpuTime((readProcessTotalCpuTime() - mm.getProcessTotalCpuTime()) / 1000000);
 		// gcc metrics
 		DoubleLongResult gcc = readGccMetrics();
 		mm.setThreadGccCount(gcc.long1 - mm.getThreadGccCount());
@@ -97,31 +97,45 @@ class MetricsUtil {
 		PlatformMetricsImpl result = new PlatformMetricsImpl(ConfigParams.APPLICATION_ID);
 		// gcc metrics
 		DoubleLongResult gcc = readGccMetrics();
-		result.setGccCount(gcc.long1);
-		result.setGccTime(gcc.long2);
+		result.setTotalGccCount(gcc.long1);
+		result.setTotalGccTime(gcc.long2);
+		long oldTotalGccCount = 0;
+		long oldTotalGccTime = 0;
+		if (previous != null) {
+			oldTotalGccCount = previous.getTotalGccCount();
+			oldTotalGccTime = previous.getTotalGccTime();
+		}
+		result.setGccCount(gcc.long1 - oldTotalGccCount);
+		result.setGccTime(gcc.long2 - oldTotalGccTime);
 		// uptime
 		RuntimeMXBean r = ManagementFactory.getRuntimeMXBean();
 		long uptime = r.getUptime();
 		result.setUptime(uptime);
-		// cpu time
-		long cpuTime = readProcessCpuTime() / 1000000;
-		result.setCpuTime(cpuTime);
+		// cpu total time
+		long totalCpuTime = readProcessTotalCpuTime() / 1000000;
+		result.setTotalCpuTime(totalCpuTime);
 		// avg cpu usage
-		double avgCpu = ((double) (cpuTime * 100) / (double) uptime);
+		double avgCpu = ((double) (totalCpuTime) / (double) uptime);
 		result.setAvgCpuUsage(avgCpu);
 		// cpu usage
-		double cpu = 0;
+		long oldTotalCpuTime = 0;
+		long oldCreationTime = 0;
 		if (previous != null) {
-			cpu = (double) ((cpuTime - previous.getCpuTime()) * 100)
-					/ (double) (result.getCreationTime() - previous.getCreationTime());
+			oldTotalCpuTime = previous.getTotalCpuTime();
+			oldCreationTime = previous.getCreationTime();
 		}
-		result.setCpuUsage(cpu);
+		double cpuUsage = (double) (totalCpuTime - oldTotalCpuTime) / (double) (result.getCreationTime() - oldCreationTime);
+		result.setCpuUsage(cpuUsage);
+		// cpu time
+		result.setCpuTime(totalCpuTime - oldTotalCpuTime);
 		// memory used
 		result.setUsedMemory(readUsedMemory());
+		// free memory
+		result.setFreeMemory(Runtime.getRuntime().freeMemory());
 		return result;
 	}
 
-	private static long readProcessCpuTime() {
+	private static long readProcessTotalCpuTime() {
 		long processCpuTime = 0;
 		if (canReadProcessTotalTime.get()) {
 			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
