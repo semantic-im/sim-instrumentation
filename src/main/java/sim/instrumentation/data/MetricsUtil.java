@@ -19,6 +19,7 @@ package sim.instrumentation.data;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.lang.management.RuntimeMXBean;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -64,9 +65,15 @@ class MetricsUtil {
 		// process time
 		mm.setProcessTotalCpuTime(readProcessTotalCpuTime());
 		// gcc metrics
-		DoubleLongResult gcc = readGccMetrics();
+		GccMetrics gcc = readGccMetrics();
 		mm.setThreadGccCount(gcc.long1);
 		mm.setThreadGccTime(gcc.long2);
+		// memory metrics
+		MemoryMetrics mem = readMemoryMetrics();
+		mm.setAllocatedMemoryBefore(mem.allocated);
+		mm.setUsedMemoryBefore(mem.used);
+		mm.setFreeMemoryBefore(mem.free);
+		mm.setUnallocatedMemoryBefore(mem.unallocated);
 	}
 
 	static void endReadMethodMetters(MethodMetricsImpl mm) {
@@ -88,15 +95,21 @@ class MetricsUtil {
 		// process time
 		mm.setProcessTotalCpuTime((readProcessTotalCpuTime() - mm.getProcessTotalCpuTime()) / 1000000);
 		// gcc metrics
-		DoubleLongResult gcc = readGccMetrics();
+		GccMetrics gcc = readGccMetrics();
 		mm.setThreadGccCount(gcc.long1 - mm.getThreadGccCount());
 		mm.setThreadGccTime(gcc.long2 - mm.getThreadGccTime());
+		// memory metrics
+		MemoryMetrics mem = readMemoryMetrics();
+		mm.setAllocatedMemoryAfter(mem.allocated);
+		mm.setUsedMemoryAfter(mem.used);
+		mm.setFreeMemoryAfter(mem.free);
+		mm.setUnallocatedMemoryAfter(mem.unallocated);
 	}
 
 	static PlatformMetricsImpl readPlatformMetrics(PlatformMetricsImpl previous) {
 		PlatformMetricsImpl result = new PlatformMetricsImpl(ConfigParams.APPLICATION_ID);
 		// gcc metrics
-		DoubleLongResult gcc = readGccMetrics();
+		GccMetrics gcc = readGccMetrics();
 		result.setTotalGccCount(gcc.long1);
 		result.setTotalGccTime(gcc.long2);
 		long oldTotalGccCount = 0;
@@ -128,10 +141,12 @@ class MetricsUtil {
 		result.setCpuUsage(cpuUsage);
 		// cpu time
 		result.setCpuTime(totalCpuTime - oldTotalCpuTime);
-		// memory used
-		result.setUsedMemory(readUsedMemory());
-		// free memory
-		result.setFreeMemory(Runtime.getRuntime().freeMemory());
+		// memory metrics
+		MemoryMetrics mem = readMemoryMetrics();
+		result.setAllocatedMemory(mem.allocated);
+		result.setUsedMemory(mem.used);
+		result.setFreeMemory(mem.free);
+		result.setUnallocatedMemory(mem.unallocated);
 		return result;
 	}
 
@@ -149,12 +164,12 @@ class MetricsUtil {
 		return processCpuTime;
 	}
 
-	private static class DoubleLongResult {
+	private static class GccMetrics {
 		private long long1;
 		private long long2;
 	}
 
-	private static DoubleLongResult readGccMetrics() {
+	private static GccMetrics readGccMetrics() {
 		List<GarbageCollectorMXBean> gccList = ManagementFactory.getGarbageCollectorMXBeans();
 		long gccCount = 0;
 		long gccTime = 0;
@@ -162,15 +177,27 @@ class MetricsUtil {
 			gccCount += gcc.getCollectionCount();
 			gccTime += gcc.getCollectionTime();
 		}
-		DoubleLongResult result = new DoubleLongResult();
+		GccMetrics result = new GccMetrics();
 		result.long1 = gccCount;
 		result.long2 = gccTime;
 		return result;
 	}
 
-	private static long readUsedMemory() {
+	private static class MemoryMetrics {
+		private long allocated;
+		private long used;
+		private long free;
+		private long unallocated;
+	}
+
+	private static MemoryMetrics readMemoryMetrics() {
 		MemoryMXBean m = ManagementFactory.getMemoryMXBean();
-		long result = m.getHeapMemoryUsage().getUsed() + m.getNonHeapMemoryUsage().getUsed();
+		MemoryMetrics result = new MemoryMetrics();
+		MemoryUsage mu = m.getHeapMemoryUsage();
+		result.allocated = mu.getCommitted();
+		result.used = mu.getUsed();
+		result.free = mu.getCommitted() - mu.getUsed();
+		result.unallocated = mu.getMax() - mu.getCommitted();
 		return result;
 	}
 }
