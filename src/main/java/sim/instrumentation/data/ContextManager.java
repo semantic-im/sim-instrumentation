@@ -43,7 +43,7 @@ public final class ContextManager {
 		String parentId = null;
 		if (parent != null)
 			parentId = parent.getId();
-		Context c = Context.create(name, tag, parentId);
+		Context c = Context.create(name, tag, parentId, ConfigParams.APPLICATION_ID);
 		s.addFirst(c);
 		return c;
 	}
