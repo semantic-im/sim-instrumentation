@@ -108,16 +108,23 @@ class MetricsUtil {
 
 	static PlatformMetricsImpl readPlatformMetrics(PlatformMetricsImpl previous) {
 		PlatformMetricsImpl result = new PlatformMetricsImpl(ConfigParams.APPLICATION_ID);
+		// read old values
+		long oldTotalGccCount = 0;
+		long oldTotalGccTime = 0;
+		long oldTotalCpuTime = 0;
+		long oldCreationTime = 0;
+		long oldTotalThreadsStarted = 0;
+		if (previous != null) {
+			oldTotalGccCount = previous.getTotalGccCount();
+			oldTotalGccTime = previous.getTotalGccTime();
+			oldTotalCpuTime = previous.getTotalCpuTime();
+			oldCreationTime = previous.getCreationTime();
+			oldTotalThreadsStarted = previous.getTotalThreadsStarted();
+		}
 		// gcc metrics
 		GccMetrics gcc = readGccMetrics();
 		result.setTotalGccCount(gcc.long1);
 		result.setTotalGccTime(gcc.long2);
-		long oldTotalGccCount = 0;
-		long oldTotalGccTime = 0;
-		if (previous != null) {
-			oldTotalGccCount = previous.getTotalGccCount();
-			oldTotalGccTime = previous.getTotalGccTime();
-		}
 		result.setGccCount(gcc.long1 - oldTotalGccCount);
 		result.setGccTime(gcc.long2 - oldTotalGccTime);
 		// uptime
@@ -131,12 +138,6 @@ class MetricsUtil {
 		double avgCpu = ((double) (totalCpuTime) / (double) uptime);
 		result.setAvgCpuUsage(avgCpu);
 		// cpu usage
-		long oldTotalCpuTime = 0;
-		long oldCreationTime = 0;
-		if (previous != null) {
-			oldTotalCpuTime = previous.getTotalCpuTime();
-			oldCreationTime = previous.getCreationTime();
-		}
 		double cpuUsage = (double) (totalCpuTime - oldTotalCpuTime) / (double) (result.getCreationTime() - oldCreationTime);
 		result.setCpuUsage(cpuUsage);
 		// cpu time
@@ -147,6 +148,11 @@ class MetricsUtil {
 		result.setUsedMemory(mem.used);
 		result.setFreeMemory(mem.free);
 		result.setUnallocatedMemory(mem.unallocated);
+		// thread metrics
+		ThreadMXBean t = ManagementFactory.getThreadMXBean();
+		result.setThreadsCount(t.getThreadCount());
+		result.setTotalThreadsStarted(t.getTotalStartedThreadCount());
+		result.setThreadsStarted(t.getTotalStartedThreadCount() - oldTotalThreadsStarted);
 		return result;
 	}
 
