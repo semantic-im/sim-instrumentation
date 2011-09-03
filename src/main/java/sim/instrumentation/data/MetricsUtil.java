@@ -66,8 +66,8 @@ class MetricsUtil {
 		mm.setProcessTotalCpuTime(readProcessTotalCpuTime());
 		// gcc metrics
 		GccMetrics gcc = readGccMetrics();
-		mm.setThreadGccCount(gcc.long1);
-		mm.setThreadGccTime(gcc.long2);
+		mm.setThreadGccCount(gcc.gccCount);
+		mm.setThreadGccTime(gcc.gccTime);
 		// memory metrics
 		MemoryMetrics mem = readMemoryMetrics();
 		mm.setAllocatedMemoryBefore(mem.allocated);
@@ -96,8 +96,8 @@ class MetricsUtil {
 		mm.setProcessTotalCpuTime((readProcessTotalCpuTime() - mm.getProcessTotalCpuTime()) / 1000000);
 		// gcc metrics
 		GccMetrics gcc = readGccMetrics();
-		mm.setThreadGccCount(gcc.long1 - mm.getThreadGccCount());
-		mm.setThreadGccTime(gcc.long2 - mm.getThreadGccTime());
+		mm.setThreadGccCount(gcc.gccCount - mm.getThreadGccCount());
+		mm.setThreadGccTime(gcc.gccTime - mm.getThreadGccTime());
 		// memory metrics
 		MemoryMetrics mem = readMemoryMetrics();
 		mm.setAllocatedMemoryAfter(mem.allocated);
@@ -123,10 +123,10 @@ class MetricsUtil {
 		}
 		// gcc metrics
 		GccMetrics gcc = readGccMetrics();
-		result.setTotalGccCount(gcc.long1);
-		result.setTotalGccTime(gcc.long2);
-		result.setGccCount(gcc.long1 - oldTotalGccCount);
-		result.setGccTime(gcc.long2 - oldTotalGccTime);
+		result.setTotalGccCount(gcc.gccCount);
+		result.setTotalGccTime(gcc.gccTime);
+		result.setGccCount(gcc.gccCount - oldTotalGccCount);
+		result.setGccTime(gcc.gccTime - oldTotalGccTime);
 		// uptime
 		RuntimeMXBean r = ManagementFactory.getRuntimeMXBean();
 		long uptime = r.getUptime();
@@ -171,8 +171,8 @@ class MetricsUtil {
 	}
 
 	private static class GccMetrics {
-		private long long1;
-		private long long2;
+		private long gccCount;
+		private long gccTime;
 	}
 
 	private static GccMetrics readGccMetrics() {
@@ -184,8 +184,8 @@ class MetricsUtil {
 			gccTime += gcc.getCollectionTime();
 		}
 		GccMetrics result = new GccMetrics();
-		result.long1 = gccCount;
-		result.long2 = gccTime;
+		result.gccCount = gccCount;
+		result.gccTime = gccTime;
 		return result;
 	}
 
