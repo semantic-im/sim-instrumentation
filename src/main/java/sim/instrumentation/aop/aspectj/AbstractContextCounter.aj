@@ -49,19 +49,19 @@ public abstract aspect AbstractContextCounter {
 	
 	public abstract pointcut pointcutToIncrementCounter();
 	
-	protected String getCounterName(JoinPoint jp) {
+	protected String getCounterName(JoinPoint jp, Context c) {
 		return this.getClass().getSimpleName();
 	}
 	
 	@SuppressAjWarnings
 	before(): pointcutToIncrementCounter() {
-		increment(getCounterName(thisJoinPoint));
-	}
-	
-	private void increment(String key) {
 		Context c = ContextManager.getCurrentContext();
 		if (c == null)
 			return;
+		increment(getCounterName(thisJoinPoint, c), c);
+	}
+	
+	private void increment(String key, Context c) {
 		Object count = c.get(key);
 		if (count == null) {
 			c.put(key, COUNT_ONE);
