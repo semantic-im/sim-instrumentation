@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,8 @@ import sim.data.PlatformMetrics;
 public class Collector {
 	private static final Logger log = LoggerFactory.getLogger(Collector.class);
 	private static final ConcurrentLinkedQueue<Metrics> measurements = new ConcurrentLinkedQueue<Metrics>();
+	private static final AtomicLong counter = new AtomicLong(0);
+	private static final Object lock = new Object();
 
 	public static void addMeasurement(MethodMetrics methodMetric) {
 		if (methodMetric == null)
@@ -53,6 +56,7 @@ public class Collector {
 			if (log.isDebugEnabled())
 				log.debug(methodMetric.toString());
 			measurements.add(methodMetric);
+			flush(counter.incrementAndGet());
 		}
 	}
 
@@ -62,6 +66,7 @@ public class Collector {
 		if (log.isDebugEnabled())
 			log.debug(context.toString());
 		measurements.add(context);
+		flush(counter.incrementAndGet());
 	}
 
 	public static void addMeasurement(PlatformMetrics pm) {
@@ -70,6 +75,19 @@ public class Collector {
 		if (log.isDebugEnabled())
 			log.debug(pm.toString());
 		measurements.add(pm);
+		flush(counter.incrementAndGet());
+	}
+
+	private static void flush(long count) {
+		if (count >= ConfigParams.AGENT_COMMUNICATION_BUFFER_SIZE) {
+			if (log.isDebugEnabled())
+				log.debug(
+						"got {} measurements - signal agent comunicator thread to send measurements to the agent",
+						count);
+			synchronized (lock) {
+				lock.notify();
+			}
+		}
 	}
 
 	static {
@@ -80,6 +98,8 @@ public class Collector {
 	}
 
 	private static class AgentComunicator extends Thread {
+		private static final Logger log = LoggerFactory.getLogger(AgentComunicator.class);
+
 		public AgentComunicator() {
 			super("SIM - AgentComunicator");
 			setDaemon(true);
@@ -89,35 +109,42 @@ public class Collector {
 		public void run() {
 			while (true) {
 				try {
-					sleep(ConfigParams.COLLECT_INTERVAL);
+					synchronized (lock) {
+						lock.wait(ConfigParams.AGENT_COMMUNICATION_TIME_DELAY);
+					}
 				} catch (InterruptedException e) {
 					break;
 				}
-				sendMeasurements();
+				if (!measurements.isEmpty())
+					sendMeasurements();
 			}
 		}
 
 		private void sendMeasurements() {
-			if (measurements.isEmpty())
-				return;
+			log.info("sending measurements to the agent");
 			ObjectOutputStream agentDataStream = null;
 			BufferedReader agentResponseStream = null;
 			try {
 				URL agentURL = new URL(ConfigParams.AGENT_LOCATION);
 				URLConnection agentConnection = agentURL.openConnection();
-				agentConnection.setConnectTimeout(ConfigParams.TIMEOUT);
-				agentConnection.setReadTimeout(ConfigParams.TIMEOUT);
+				agentConnection.setConnectTimeout(ConfigParams.AGENT_COMMUNICATION_TIMEOUT);
+				agentConnection.setReadTimeout(ConfigParams.AGENT_COMMUNICATION_TIMEOUT);
 				agentConnection.setDoInput(true);
 				agentConnection.setDoOutput(true);
 				agentConnection.setUseCaches(false);
 				agentDataStream = new ObjectOutputStream(agentConnection.getOutputStream());
 				int count = 0;
-				while (!measurements.isEmpty()) {
-					agentDataStream.writeObject(measurements.remove());
+				while (true) {
+					Metrics m = measurements.poll();
+					if (m == null)
+						break;
+					agentDataStream.writeObject(m);
 					count++;
-					if (count >= ConfigParams.MAX_METRICS_WRITE)
+					if (count >= ConfigParams.AGENT_COMMUNICATION_BUFFER_SIZE)
 						break;
 				}
+				counter.addAndGet(0 - count);
+				log.info("{} measurements sent to the agent", count);
 				agentDataStream.flush();
 				agentDataStream.close();
 				agentDataStream = null;

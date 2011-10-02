@@ -44,7 +44,7 @@ class PlatformMetricsReader {
 			PlatformMetricsImpl pm = null;
 			while (true) {
 				try {
-					sleep(ConfigParams.COLLECT_INTERVAL);
+					sleep(ConfigParams.PLATFORM_METRICS_COLLECT_INTERVAL);
 				} catch (InterruptedException e) {
 					break;
 				}
